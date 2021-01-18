@@ -27,6 +27,7 @@ public class Server {
 
     public void init() {
         try {
+            System.out.println("tranditional server init....");
             ServerSocket server = new ServerSocket(ConstantInfo.SERVER_PORT);
             // 阻塞式监听，获取服务端的socket
             Socket socket = server.accept();

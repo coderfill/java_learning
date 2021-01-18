@@ -15,4 +15,8 @@ public class ConstantInfo {
     public final static int SERVER_PORT = 9999;
 
     public final static String SERVER_ADDRESS = "127.0.0.1";
+
+    public final static int CORE_POOL_SIZE = 3;
+    public final static int MAX_THREAD_NUM = 10;
+    public final static int WORK_QUEUE_SIZE = 20;
 }
