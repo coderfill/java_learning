@@ -3,3 +3,4 @@
 *.iml
 /bio/*.iml
 *.xml
+*.class
