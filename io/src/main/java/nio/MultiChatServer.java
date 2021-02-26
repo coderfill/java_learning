@@ -50,9 +50,9 @@ public class MultiChatServer {
     }
 
     /**
-     * 启动服务端
+     * 启动服务端并进行事件监听
      */
-    public void startAndListen() {
+    public void startAndListenning() {
         System.out.println("Server starting.....");
         while (!stop) {
             try {
@@ -74,6 +74,15 @@ public class MultiChatServer {
     }
 
 
+    /**
+     * 对监听到的{@link SelectionKey}进行处理
+     * <pre>
+     *     如果是{@link SelectionKey#OP_ACCEPT}，则获取对应的{@link SocketChannel}并注册至选择器中
+     *     如果是{@link SelectionKey#OP_READ}，
+     * </pre>
+     * @param key 监听到的事件对象{@link SelectionKey}
+     * @throws IOException
+     */
     protected void handle(SelectionKey key) throws IOException {
         if (key.isValid()) {
             if (key.isAcceptable()) {
@@ -85,22 +94,50 @@ public class MultiChatServer {
                 channel.configureBlocking(false);
                 channel.register(selector, SelectionKey.OP_READ);
             } else if (key.isReadable()) {
-                /**
-                 * 处理客户端的传输过来的数据
-                 */
-                SocketChannel sc = (SocketChannel) key.channel();
-                ByteBuffer buffer = ByteBuffer.allocate(1024);
-                int count = sc.read(buffer);
-                if (count > 0) {
-                    buffer.flip();
-                    String msg = new String(buffer.array(), 0, buffer.remaining());
-                    System.out.println("client msg:" + msg);
-                }
+                String msg = read(key);
+                System.out.println("读取到客户端发送的消息:" + msg);
+                forwardToOtherClients();
+            }
+        }
+    }
+
+
+    /**
+     * 读取通道中的数据并返回
+     * @param key 监听到的事件对象{@link SelectionKey}
+     * @return
+     */
+    protected String read(SelectionKey key) {
+        String msg = null;
+        try {
+            SocketChannel sc = (SocketChannel) key.channel();
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            int count = sc.read(buffer);
+            if (count > 0) {
+                buffer.flip();
+                msg = new String(buffer.array(), 0, buffer.remaining());
+            } else if (count == 0) {
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("读取数据失败....");
+        }
+        return msg;
+    }
+
+    protected void forwardToOtherClients() {
+        Set<SelectionKey> selectionKeys = selector.selectedKeys();
+        if (selectionKeys.size() > 0) {
+            Iterator<SelectionKey> iterator = selectionKeys.iterator();
+            while (iterator.hasNext()) {
+                SelectionKey key = iterator.next();
+
             }
         }
     }
 
     public static void main(String[] args) {
-        new MultiChatServer().startAndListen();
+        new MultiChatServer().startAndListenning();
     }
 }
